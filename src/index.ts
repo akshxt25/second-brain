@@ -51,7 +51,8 @@ app.post("/api/v1/signin", async (req, res) => {
 
     try {
         const exsistingUser = await UserModel.findOne({
-            username: username
+            username: username,
+            password: password
         })
 
         if(!exsistingUser){
@@ -77,6 +78,10 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     const link = req.body.link;            //content link eg-> yt url, x post 
     const title = req.body.title;
 
+    console.log("before content creation")
+    //@ts-ignore
+    console.log(req.userId);
+
     ContentModel.create({
         link,
         title,
@@ -85,15 +90,47 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
         tags: []
     })
 
+    console.log("call after content creation")
+
+    return res.json({
+        message: "Content added"
+    })
+
 })
 
-// app.get("/api/v1/content", (req, res) => {
+app.get("/api/v1/content", userMiddleware, async (req, res) => {
+    //@ts-ignore
+    const userId = req.userId;
 
-// })
+    const result = await ContentModel.find({
+        owner: userId
+    })
 
-// app.delete("/api/v1/content", (req, res) => {
+    return res.json({
+        result
+    })
 
-// })
+})
+
+app.delete("/api/v1/content", userMiddleware, async (req, res) => {
+    //@ts-ignore
+    const userId = req.userId;
+
+    const contentId = req.body.contentId;
+
+    if(!userId){
+        return res.status(404).json({
+            message: "User not found"
+        })
+    }
+
+    await ContentModel.findByIdAndDelete(contentId)
+
+    return res.json({
+        message: "Content deleted"
+    })
+
+})
 
 // app.post("/api/v1/brain/share", (req, res) => {
 

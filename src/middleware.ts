@@ -9,6 +9,8 @@ export const userMiddleware = (req: Request, res: Response, next: NextFunction) 
     if(decoded){
         // @ts-ignore
         req.userId = decoded.id
+        console.log("usertoken: ", decoded)
+        next();
     } else{
         res.status(403).json({
             message: "no authorization token found"
