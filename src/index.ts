@@ -2,6 +2,7 @@ import express from "express"
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken"
 import connectDB, { ContentModel, LinkModel, UserModel } from "./db.js";
+import z from "zod";
 
 import dns from "node:dns";
 import { userMiddleware } from "./middleware.js";
@@ -24,17 +25,54 @@ app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
 
+
+ const signupSchema = z.object({
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters")
+ });
+
+ const signinSchema = signupSchema;
+
+ const contentSchema = z.object({
+    title: z.string().min(1),
+    link: z.string()
+ });
+
+ const deleteContentSchema = z.object({
+    contentId: z.string()
+ });
+
+ const shareBrainSchema = z.object({
+    share: z.boolean()
+ })
+
+ const shareLinkSchema = z.object({
+    shareLink: z.string().min(1)
+ })
+
+
+
 app.post("/api/v1/signup" , async (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
+    // const username = req.body.username;
+    // const password = req.body.password;
+
+    const result = signupSchema.safeParse(req.body);
+
+    if(!result.success){
+        return res.status(400).json({
+            errors: result.error.flatten().fieldErrors
+        })
+    }
+
+    const { username, password } = result.data;
 
     try {
-        const result = await UserModel.create({
+        const user = await UserModel.create({
             username: username,
             password: password
         })
 
-        console.log(result);
+        console.log(user);
 
         res.json({
             message: "you signed up"
@@ -47,8 +85,18 @@ app.post("/api/v1/signup" , async (req, res) => {
 })
 
 app.post("/api/v1/signin", async (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
+    // const username = req.body.username;
+    // const password = req.body.password;
+
+    const result = signinSchema.safeParse(req.body)
+
+    if(!result.success){
+        return res.status(400).json({
+            errors: result.error.flatten()
+        })
+    }
+
+    const {username, password} = result.data;
 
     try {
         const exsistingUser = await UserModel.findOne({
@@ -76,8 +124,18 @@ app.post("/api/v1/signin", async (req, res) => {
 })
 
 app.post("/api/v1/content", userMiddleware, async (req, res) => {
-    const link = req.body.link;            //content link eg-> yt url, x post 
-    const title = req.body.title;
+    // const link = req.body.link;            //content link eg-> yt url, x post 
+    // const title = req.body.title;
+
+    const result = contentSchema.safeParse(req.body);
+
+    if(!result.success){
+        return res.status(400).json({
+            errors: result.error.flatten().fieldErrors
+        })
+    }
+
+    const {title, link} = result.data;
 
     console.log("before content creation")
     //@ts-ignore
@@ -117,7 +175,15 @@ app.delete("/api/v1/content", userMiddleware, async (req, res) => {
     //@ts-ignore
     const userId = req.userId;
 
-    const contentId = req.body.contentId;
+    // const contentId = req.body.contentId;
+
+    const result = deleteContentSchema.safeParse(req.body);
+    
+    if(!result.success){
+        return res.status(400).json(result.error.flatten());
+    }
+    
+    const {contentId} = result.data;
 
     if(!userId){
         return res.status(404).json({
@@ -134,7 +200,17 @@ app.delete("/api/v1/content", userMiddleware, async (req, res) => {
 })
 
 app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
-    const share = req.body.share;
+    // const share = req.body.share;
+
+    const result = shareBrainSchema.safeParse(req.body);
+
+    if(!result.success){
+        return res.status(400).json(result.error.flatten());
+    }
+
+    const {share} = result.data;
+    
+
     if(share){
         const existingLink = await LinkModel.findOne({
             //@ts-ignore
@@ -165,9 +241,20 @@ app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
 })
 
 app.get("/api/v1/brain/:shareLink", async(req, res) => {
-    const hash = req.params.shareLink;
+    // const hash = req.params.shareLink;
+
+    const result = shareLinkSchema.safeParse(req.params);
+
+    if(!result.success){
+        return res.status(400).json(result.error.flatten());
+    }
+
+    const {shareLink} = result.data;
+
+
+
     const link = await LinkModel.findOne({
-        hash
+        hash: shareLink
     });
 
     if(!link){
