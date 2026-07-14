@@ -1,8 +1,13 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
-const MONGO_URL = process.env.MONGO_URL as string;
-async function connectDB(){
-    const result = await mongoose.connect(MONGO_URL);
+async function connectDB() {
+    console.log("Inside connectDB:", process.env.MONGO_URL);
+
+    if (!process.env.MONGO_URL) {
+        throw new Error("MONGO_URL not found");
+    }
+
+    await mongoose.connect(process.env.MONGO_URL);
 }
 
 export default connectDB;

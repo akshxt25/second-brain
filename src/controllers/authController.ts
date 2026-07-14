@@ -54,6 +54,8 @@ export const login = async (req: Request, res: Response) => {
       })
     }
 
+    console.log(req.body)
+
     const user = await UserModel.findOne({
       email: email
     })
