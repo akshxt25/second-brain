@@ -7,10 +7,9 @@ export const register = async (req: Request, res: Response) => {
   const {username, email, password} = req.body;
   try{
     if(!username || !password || !email){
-      res.status(400).json({
+      return res.status(400).json({
         message: "All fields required"
       })
-      return;
     }
 
     const checkEmail = await UserModel.findOne({
@@ -18,7 +17,7 @@ export const register = async (req: Request, res: Response) => {
     })
     
     if(checkEmail){
-      res.status(409).json({
+      return res.status(409).json({
         message: "Email already exists"
       })
     }
@@ -33,13 +32,13 @@ export const register = async (req: Request, res: Response) => {
 
     await newUser.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User signed up successfully"
     })
 
   }
   catch(error){
-    return res.status(404).json({
+    return res.status(500).json({
       message: "Some Error Occured"
     })    
   }

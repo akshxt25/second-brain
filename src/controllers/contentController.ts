@@ -50,7 +50,7 @@ export const getContent = async (req: AuthRequest, res: Response) => {
         });
     }
 
-    const user = await UserModel.findById({userId})
+    const user = await UserModel.findById(userId)
 
     if(!user){
       return res.status(409).json({
