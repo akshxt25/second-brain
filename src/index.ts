@@ -7,10 +7,10 @@ import dns from "node:dns";
 import router from "./routes/userRoute.js";
 
 
-dns.setServers([
-  "8.8.8.8",
-  "1.1.1.1"
-]);
+// dns.setServers([
+//   "8.8.8.8",
+//   "1.1.1.1"
+// ]);
 
 const app = express();
 app.use(express.json());
