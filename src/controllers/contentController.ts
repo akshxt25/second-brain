@@ -3,6 +3,7 @@ import type { AuthRequest } from "../middlewares/authMiddleware.js";
 import { ContentModel } from "../models/contentModel.js";
 import { UserModel } from "../models/userModel.js";
 import { buildContextText, generateEmbedding } from "../services/embeddingService.js";
+import mongoose from "mongoose";
 
 
 export const postContent = async (req: AuthRequest, res: Response) => {
@@ -191,7 +192,7 @@ export const searchContent = async (req: AuthRequest, res: Response) => {
           numCandidates: 100,
           limit: 20,
           filter: {
-            owner: userId
+            owner: new mongoose.Types.ObjectId(userId)
           }
         }
       },
@@ -205,6 +206,11 @@ export const searchContent = async (req: AuthRequest, res: Response) => {
           tags: 1,
           owner: 1,
           score: { $meta: "vectorSearchScore" }
+        }
+      },
+      {
+        $match: {
+          score: { $gte: 0.65 } // Minimum similarity threshold
         }
       }
     ]);
