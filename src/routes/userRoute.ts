@@ -2,8 +2,7 @@ import {Router} from "express";
 
 import { postContent, shareContent, deleteContent, getContent, searchContent } from "../controllers/contentController.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
-import { login, register } from "../controllers/authController.js";
-
+import { login, register, logout } from "../controllers/authController.js";
 
 
 
@@ -11,6 +10,7 @@ const router = Router();
 
 router.post("/signup", register);
 router.post("/login", login);
+router.post("/logout", logout);
 router.post("/add-content",authMiddleware, postContent);
 router.get("/get-content", authMiddleware, getContent);
 router.get("/search", authMiddleware, searchContent);

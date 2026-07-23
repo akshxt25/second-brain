@@ -88,6 +88,15 @@ export const login = async (req: Request, res: Response) => {
       return res.status(500).json({
         message: "Something went wrong"
       })
-    
   }
+}
+
+export const logout = async (req: Request, res: Response) => {
+  // Since you are using JWTs stored on the client (not in HTTP-only cookies), 
+  // the actual logout logic happens on the frontend by removing the token.
+  // This endpoint is provided for consistency and in case you want to add 
+  // server-side token blacklisting or cookie clearing in the future.
+  return res.status(200).json({
+    message: "User logged out successfully"
+  });
 }
